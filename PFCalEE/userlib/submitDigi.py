@@ -175,7 +175,7 @@ for nPuVtx in nPuVtxlist:
             #wrapper
             scriptFile = open('%s/runDigiJob%s.sh'%(outDir,suffix), 'w')
             scriptFile.write('#!/bin/bash\n')
-            scriptFile.write('source %s/../g4env.sh\n'%(os.getcwd()))
+            scriptFile.write('source /data/cmszfs1/sw/HGCAL_SIM_A/setup.sh\n')
             #scriptFile.write('cd %s\n'%(outDir))
             outTag='%s_version%d_model%d_%s'%(label,opt.version,opt.model,bval)
             if en>0 : outTag='%s_et%d'%(outTag,en)
@@ -214,9 +214,8 @@ for nPuVtx in nPuVtxlist:
             scriptFile.close()
             
             #submit
+
             os.system('chmod u+rwx %s/runDigiJob%s.sh'%(outDir,suffix))
             if opt.nosubmit : os.system('echo bsub -q %s %s/runDigiJob%s.sh'%(myqueue,outDir,suffix)) 
             else: os.system("bsub -q %s \'%s/runDigiJob%s.sh\'"%(myqueue,outDir,suffix))
-
-
 

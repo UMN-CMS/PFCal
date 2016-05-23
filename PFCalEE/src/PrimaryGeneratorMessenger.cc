@@ -39,64 +39,37 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-PrimaryGeneratorMessenger::PrimaryGeneratorMessenger(
-                                          PrimaryGeneratorAction* Gun)
-:Action(Gun)
+PrimaryGeneratorMessenger::PrimaryGeneratorMessenger(PrimaryGeneratorAction* Gun)
+ : G4UImessenger(),
+   fAction(Gun),
+   fDir(0),
+   fInputFile(0)
+
 {
-  dir= new G4UIdirectory("/generator/");
-  dir-> SetGuidance("Control commands for primary generator");
+  fDir = new G4UIdirectory("/filemode/");
+  fDir->SetGuidance("Primary generator control for neutron events");
 
-  select= new G4UIcmdWithAString("/generator/select", this);
-  select-> SetGuidance("select generator type");
-  select-> SetParameterName("generator_type", false, false);
-  select-> SetCandidates("particleGun pythia hepmcAscii");
-  select-> SetDefaultValue("particleGun");
-
-  RndmCmd = new G4UIcmdWithAString("/generator/particleGun/rndm",this);
-  RndmCmd->SetGuidance("Shoot randomly the incident particle.");
-  RndmCmd->SetGuidance("  Choice : on(default), off");
-  RndmCmd->SetParameterName("choice",true);
-  RndmCmd->SetDefaultValue("on");
-  RndmCmd->SetCandidates("on off");
-  RndmCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+  fInputFile = new G4UIcmdWithAString("/filemode/inputFilename", this);
+  fInputFile->SetGuidance("Select input data file.");
+  fInputFile->SetParameterName("choice", false);
+  fInputFile->AvailableForStates(G4State_PreInit);
+  
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PrimaryGeneratorMessenger::~PrimaryGeneratorMessenger()
 {
-  delete select;
-  delete RndmCmd;
-  delete dir;
-  //delete gunDir;
+  delete fInputFile;
+  delete fDir;
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void PrimaryGeneratorMessenger::SetNewValue(
-                                        G4UIcommand* command, G4String newValue)
+void PrimaryGeneratorMessenger::SetNewValue(G4UIcommand* command, G4String newValue)
 { 
-  if ( command==select) {
-    Action->SetGenerator(newValue);
-    G4cout << "current generator type: " 
-	   << Action-> GetGeneratorName() << G4endl;
-  } else if( command == RndmCmd ){ 
-    Action->SetRndmFlag(newValue);
-  }
-  else {}
+  if (command == fInputFile) { fAction->SetInputFile(newValue); }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-
-//////////////////////////////////////////////////////////////////////////////
-G4String PrimaryGeneratorMessenger::GetCurrentValue(G4UIcommand* command)
-//////////////////////////////////////////////////////////////////////////////
-{
-  G4String cv, st;
-  if (command == select) {
-    cv= Action-> GetGeneratorName();
-  } 
-
- return cv;
-}

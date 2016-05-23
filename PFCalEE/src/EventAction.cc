@@ -113,7 +113,6 @@ void EventAction::EndOfEventAction(const G4Event* g4evt)
   //	    << " z=" << g4evt->GetPrimaryVertex(0)->GetZ0()
   //	    << " t=" << g4evt->GetPrimaryVertex(0)->GetT0()
   //	    << std::endl;
-
   event_.vtx_x(g4evt->GetPrimaryVertex(0)->GetX0());
   event_.vtx_y(g4evt->GetPrimaryVertex(0)->GetY0());
   event_.vtx_z(g4evt->GetPrimaryVertex(0)->GetZ0());

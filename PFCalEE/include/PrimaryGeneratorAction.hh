@@ -35,79 +35,48 @@
 #define PrimaryGeneratorAction_h 1
 
 #include "G4VUserPrimaryGeneratorAction.hh"
+#include "G4ThreeVector.hh"
 #include "globals.hh"
 #include <map>
+#include <string>
+#include <fstream>
 
 class G4Event;
+class G4ParticleGun;
+//class HepMCG4AsciiReader;
+//class HepMCG4PythiaInterface;
 class DetectorConstruction;
 class PrimaryGeneratorMessenger;
-class G4VPrimaryGenerator;
-class G4ParticleGun;
-class HepMCG4AsciiReader;
-class HepMCG4PythiaInterface;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
 public:
-  PrimaryGeneratorAction(G4int mod=0, double eta=0);    
+  PrimaryGeneratorAction(G4int mod = 0);    
   virtual ~PrimaryGeneratorAction();
 
-  void GeneratePrimaries(G4Event*);
-  void SetRndmFlag(G4String val) { rndmFlag = val;}
+  virtual void GeneratePrimaries(G4Event* anEvent);
 
-  void SetGenerator(G4VPrimaryGenerator* gen);
-  void SetGenerator(G4String genname);
+  // set methods
+  bool SetInputFile(std::string filename);
 
-  G4VPrimaryGenerator* GetGenerator() const;
-  G4String GetGeneratorName() const;
+  bool goodStream();
 
 private:
+  bool GetNextPrimaryStats(G4ThreeVector& v, G4ThreeVector& r, G4double& energy, G4int& pid);
+
+private:
+  G4ParticleGun*             fParticleGun; // G4 particle gun
+  std::ifstream*             fEventStream;
+  int                        fNEventsRead;
+  G4String                   fInputFile;
+
+  DetectorConstruction*      fDetector;
+  PrimaryGeneratorMessenger* fPrimaryGenMessenger;
+
   int model_;
-  double eta_;
-  G4ParticleGun* particleGun;
-  HepMCG4AsciiReader* hepmcAscii;
-  HepMCG4PythiaInterface* pythiaGen;
-
-  G4VPrimaryGenerator* currentGenerator;
-  G4String currentGeneratorName;
-  std::map<G4String, G4VPrimaryGenerator*> gentypeMap;
-
-  DetectorConstruction*    Detector;     //pointer to the geometry    
-  PrimaryGeneratorMessenger* gunMessenger; //messenger of this class
-  G4String                   rndmFlag;     //flag for a rndm impact point
+  
 };
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-// ====================================================================
-// inline functions
-// ====================================================================
-
-inline void PrimaryGeneratorAction::SetGenerator
-(G4VPrimaryGenerator* gen)
-{
-  currentGenerator= gen;
-}
-
-inline void PrimaryGeneratorAction::SetGenerator(G4String genname)
-{
-  std::map<G4String, G4VPrimaryGenerator*>::iterator pos= gentypeMap.find(genname);
-  if(pos != gentypeMap.end()) {
-    currentGenerator= pos->second;
-    currentGeneratorName= genname;
-  }
-}
-
-inline G4VPrimaryGenerator* PrimaryGeneratorAction::GetGenerator() const
-{
-  return currentGenerator;
-}
-
-inline G4String PrimaryGeneratorAction::GetGeneratorName() const
-{
-  return currentGeneratorName;
-}
 #endif
-
-

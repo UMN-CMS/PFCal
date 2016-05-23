@@ -27,7 +27,6 @@ int main(int argc,char** argv)
 #else
   std::cout << " -- G4VIS_USE is not set " << std::endl;
 #endif
-
   // Choose the Random engine
   CLHEP::HepRandom::setTheEngine(new CLHEP::RanecuEngine);
   
@@ -38,40 +37,38 @@ int main(int argc,char** argv)
   G4RunManager * runManager = new G4RunManager;
 
   // Set mandatory initialization classes
-  //int version=DetectorConstruction::v_HGCAL_2016TB;
-  int version=33;
+  int version=DetectorConstruction::v_HGCAL_2016TB;
+
   //int version=DetectorConstruction::v_HGCALEE_TB;
-  int model=DetectorConstruction::m_FULLSECTION;
+  //int model=DetectorConstruction::m_FULLSECTION;
   //int model=DetectorConstruction::m_BOXWITHCRACK_100;
   //int model=DetectorConstruction::m_2016TB;
-  //int model=DetectorConstruction::m_SIMPLE_100;
-
-  double eta=0;
+  int model=DetectorConstruction::m_SIMPLE_100;
 
   if(argc>2) version=atoi(argv[2]);
   if(argc>3) model=atoi(argv[3]);
-  if(argc>4) eta=atof(argv[4]);
 
   std::cout << "-- Running version " << version << " model " << model << std::endl;
 
   std::string absThickW="1.75,1.75,1.75,1.75,1.75,2.8,2.8,2.8,2.8,2.8,4.2,4.2,4.2,4.2,4.2";
   std::string absThickPb="1,1,1,1,1,2.1,2.1,2.1,2.1,2.1,4.4,4.4,4.4,4.4";
   std::string dropLayers="";
-  if(argc>5) absThickW = argv[5];
-  if(argc>6) absThickPb = argv[6];
-  if(argc>7) dropLayers = argv[7];
+  if(argc>5) absThickW = argv[4];
+  if(argc>6) absThickPb = argv[5];
+  if(argc>7) dropLayers = argv[6];
 
   runManager->SetUserInitialization(new DetectorConstruction(version,model,absThickW,absThickPb,dropLayers));
   runManager->SetUserInitialization(new PhysicsList);
 
   // Set user action classes
-  runManager->SetUserAction(new PrimaryGeneratorAction(model,eta));
+  runManager->SetUserAction(new PrimaryGeneratorAction(model));
   runManager->SetUserAction(new RunAction);
   runManager->SetUserAction(new EventAction);
   runManager->SetUserAction(new SteppingAction);
   
+  
   // Initialize G4 kernel
-  runManager->Initialize();
+ // runManager->Initialize();
   
   // Initialize visualization
 #ifdef G4VIS_USE
@@ -99,6 +96,7 @@ int main(int argc,char** argv)
 		<< " ====================================== " << std::endl;
       G4String command = "/control/execute ";
       UImanager->ApplyCommand(command+fileName);
+
     }
   else
     {
@@ -116,7 +114,7 @@ int main(int argc,char** argv)
       delete ui;
 #endif
     }
-
+runManager->Initialize();
 #ifdef G4VIS_USE
   delete visManager;
 #endif

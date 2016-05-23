@@ -32,8 +32,6 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #include "PrimaryGeneratorAction.hh"
-
-#include "DetectorConstruction.hh"
 #include "PrimaryGeneratorMessenger.hh"
 
 #include "G4RunManager.hh"
@@ -42,112 +40,176 @@
 #include "G4ParticleTable.hh"
 #include "G4ParticleDefinition.hh"
 #include "G4SystemOfUnits.hh"
+#include "G4GenericMessenger.hh"
 #include "Randomize.hh"
 
 #include "HepMCG4AsciiReader.hh"
 #include "HepMCG4PythiaInterface.hh"
 
-#define PI 3.1415926535
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-PrimaryGeneratorAction::PrimaryGeneratorAction(G4int mod, double eta)
+PrimaryGeneratorAction::PrimaryGeneratorAction(G4int mod)
+ : G4VUserPrimaryGeneratorAction(),
+   fParticleGun(0),
+   fEventStream(0),
+   fNEventsRead(0),
+   fInputFile("")
 {
   model_ = mod;
-  eta_ = eta;
   G4int n_particle = 1;
 
   // default generator is particle gun.
-  currentGenerator= particleGun= new G4ParticleGun(n_particle);
-  currentGeneratorName= "particleGun";
-  hepmcAscii= new HepMCG4AsciiReader();
-#ifdef G4LIB_USE_PYTHIA
-  pythiaGen= new HepMCG4PythiaInterface();
-#else
-  pythiaGen= 0;
-#endif
-  gentypeMap["particleGun"]= particleGun;
-  gentypeMap["hepmcAscii"]= hepmcAscii;
-  gentypeMap["pythia"]= pythiaGen;
-
-  Detector = (DetectorConstruction*)
-             G4RunManager::GetRunManager()->GetUserDetectorConstruction();
- 
-  //create a messenger for this class
-  gunMessenger = new PrimaryGeneratorMessenger(this);
-
-  // default particle kinematic
+  fParticleGun = new G4ParticleGun(n_particle);
 
   G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
   G4String particleName;
   G4ParticleDefinition* particle
-                    = particleTable->FindParticle(particleName="e-");
-  particleGun->SetParticleDefinition(particle);
-  particleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
-  particleGun->SetParticleEnergy(10.*GeV);
-  G4double position = -0.5*(Detector->GetWorldSizeZ());
-  particleGun->SetParticlePosition(G4ThreeVector(0.*cm,0.*cm,position));
+                    = particleTable->FindParticle(particleName = "e-");
+  fParticleGun->SetParticleDefinition(particle);
+  fParticleGun->SetParticleEnergy(10.*GeV);
   
-  G4cout << " -- Gun position set to: 0,0," << position << G4endl;
-
-  rndmFlag = "off";
-
+  fDetector = (DetectorConstruction*)
+             G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+  fPrimaryGenMessenger = new PrimaryGeneratorMessenger(this);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-PrimaryGeneratorAction::~PrimaryGeneratorAction()
-{
-  delete particleGun;
-  delete hepmcAscii;
-  delete pythiaGen;
-  delete gunMessenger;
+PrimaryGeneratorAction::~PrimaryGeneratorAction() {
+    delete fParticleGun;
+    delete fPrimaryGenMessenger;
+
+    fEventStream->close();
+    delete fEventStream;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
-{
-  //this function is called at the begining of event
-  // 
-  G4double x0 = 0.*cm, y0 = 0.*cm;
-  G4double z0 = -0.5*(Detector->GetWorldSizeZ());
+bool PrimaryGeneratorAction::SetInputFile(std::string filename) {
+    // If stream was previously defined/linked to another file, close and delete
+    // first.
+    if (fEventStream != 0) {
+        fEventStream->close();
+        delete fEventStream;
+    }
+    fInputFile = filename;
+    // Open new stream
+    fEventStream = new std::ifstream(filename.c_str());
+    fNEventsRead = 0;
 
-  switch(model_) {
-  case 2:
-    //smear within 1cm...
-    z0 = (G4RandGauss::shoot(0.,5.))*cm; break;
-  case 4:
-    x0 = (G4RandFlat::shoot(0.,460)-170)*mm; break;
-    //y0 = (G4RandFlat::shoot(0.,10.)-5)*mm;
-  case 3:
-  case 5:
-    //x0 = (G4RandFlat::shoot(0.,30)-15)*mm;
-    //y0 = (G4RandFlat::shoot(0.,30.)-15)*mm;
-    //update to cover full hexagon
-    //size=6.4mm
-    x0 = (G4RandFlat::shoot(0.,1.)-0.5)*mm;
-    y0 = (G4RandFlat::shoot(0.,1.)-0.5)*mm;
-    break;
-  default: break;
-  }
+    // Check it, exit if open failed.
+    if (!goodStream()) {
+        G4ExceptionDescription msg;
+        msg << "Input file not set successfully, please check that file "
+                << filename << " exists and is readable."
+                << G4endl;
+        G4Exception("PrimaryGeneratorAction::SetInputFile()",
+                "MyCode0001", JustWarning, msg);
 
-  particleGun->SetParticlePosition(G4ThreeVector(x0,y0,z0));
-  G4cout << " -- Gun position set to: " << x0 << "," << y0 << "," << z0 << G4endl;
+        return false;
+    }
 
-  G4double theta0 = 2*atan(exp(-1*eta_));
-  G4double phi0 = (G4RandFlat::shoot(0.,2*PI));
-  if (model_ == 2) particleGun->SetParticleMomentumDirection(G4ThreeVector(cos(phi0)*sin(theta0), sin(phi0)*sin(theta0), cos(theta0)));
-  
-  if(currentGenerator){
-    currentGenerator->GeneratePrimaryVertex(anEvent);
-  }
-  else
-    G4Exception("PrimaryGeneratorAction::GeneratePrimaries",
-                "PrimaryGeneratorAction001", FatalException,
-                "generator is not instanciated." );
+    // Advance to the beginning of events.  
+    std::string line = "";
+    while ((line.length() != 7 || line.substr(0, 7).compare("<event>") != 0) && goodStream()) {
 
+        std::getline(*fEventStream, line);
+    }
+    return goodStream();
+}
 
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+bool PrimaryGeneratorAction::GetNextPrimaryStats(G4ThreeVector& v, G4ThreeVector& r, G4double& energy, G4int& pid) {
+
+    std::string line = "";
+
+    bool gotStats = false;
+    while (std::getline(*fEventStream, line) && goodStream() && (line.length() != 8 || line.substr(0, 8) != "</event>")) {
+        
+        std::istringstream ss(line);
+        double px = 0, py = 0, pz = 0;
+        double x = 0, y = 0, z = 0;
+        if (!(ss >> pid >> x >> y >> z >> px >> py >> pz >> energy)) { 
+           break;
+        }
+        r.set(x, y, z);
+        v.set(px*GeV, py*GeV, pz*GeV);
+        gotStats = true;
+    }
+    
+    std::getline(*fEventStream, line);
+
+    if (line.substr(0, 9) == "</event>") {
+        return false;
+    }
+    if (!gotStats) {
+        G4ExceptionDescription msg;
+        msg << "Failed to read primary momentum from file after " << fNEventsRead
+                << " good Events" << G4endl;
+        G4Exception("PrimaryGeneratorAction::GetNextPrimaryStats()",
+                "MyCode0003", RunMustBeAborted, msg);
+        return false;
+    }
+
+    ++fNEventsRead;
+
+    if (!goodStream()) {
+        G4ExceptionDescription msg;
+        msg << "Error or EOF in reading primary events from file after" << fNEventsRead
+                << " good Events" << G4endl;
+        G4Exception("PrimaryGeneratorAction::GetNextPrimaryStats()",
+                "MyCode0004", JustWarning, msg);
+    }
+    return true;
+}
+
+bool PrimaryGeneratorAction::goodStream() {
+    if (fEventStream == 0) return false;
+    return fEventStream->good();
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent) {
+
+    if (fEventStream == 0) {
+        G4ExceptionDescription msg;
+        msg << "Must set input file using SetInputFile method or "
+                << "/file/inputFilename/ UI command"
+                << G4endl;
+        G4Exception("PrimaryGeneratorAction::GeneratePrimaries()",
+                "MyCode0006", RunMustBeAborted, msg);
+        return;
+    }
+
+    if (!goodStream()) {
+        G4ExceptionDescription msg;
+        msg << "Cannot generate any more primary events because input file is unusable."
+                << G4endl;
+        G4Exception("PrimaryGeneratorAction::GeneratePrimaries()",
+                "MyCode0005", RunMustBeAborted, msg);
+        return;
+    }
+
+    // Set gun position and momentum
+    G4ThreeVector nextPrimaryPosition;
+    G4ThreeVector nextPrimaryMomentumDirection;
+    G4double nextPrimaryEnergy;
+    G4int pid;
+    if (!GetNextPrimaryStats(nextPrimaryMomentumDirection, nextPrimaryPosition, nextPrimaryEnergy, pid)) {
+        G4Exception("G4HEPEvtInterface::GeneratePrimaryVertex","Event0202", JustWarning,"End-Of-File : HEPEvt input file");
+        return;
+    }
+    G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
+    G4ParticleDefinition* particle = particleTable->FindParticle(pid);
+    
+    //Set gun position, direction and energy
+    fParticleGun->SetParticlePosition(nextPrimaryPosition);
+    fParticleGun->SetParticleMomentumDirection(nextPrimaryMomentumDirection);
+    fParticleGun->SetParticleEnergy(nextPrimaryEnergy);
+    fParticleGun->SetParticleDefinition(particle);
+    fParticleGun->GeneratePrimaryVertex(anEvent);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
