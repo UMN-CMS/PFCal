@@ -49,28 +49,27 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PrimaryGeneratorAction::PrimaryGeneratorAction(G4int mod)
- : G4VUserPrimaryGeneratorAction(),
-   fParticleGun(0),
-   fEventStream(0),
-   fNEventsRead(0),
-   fInputFile("")
-{
-  model_ = mod;
-  G4int n_particle = 1;
+: G4VUserPrimaryGeneratorAction(),
+fParticleGun(0),
+fEventStream(0),
+fNEventsRead(0),
+fInputFile("") {
+    model_ = mod;
+    G4int n_particle = 1;
 
-  // default generator is particle gun.
-  fParticleGun = new G4ParticleGun(n_particle);
+    // default generator is particle gun.
+    fParticleGun = new G4ParticleGun(n_particle);
 
-  G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
-  G4String particleName;
-  G4ParticleDefinition* particle
-                    = particleTable->FindParticle(particleName = "e-");
-  fParticleGun->SetParticleDefinition(particle);
-  fParticleGun->SetParticleEnergy(10.*GeV);
-  
-  fDetector = (DetectorConstruction*)
-             G4RunManager::GetRunManager()->GetUserDetectorConstruction();
-  fPrimaryGenMessenger = new PrimaryGeneratorMessenger(this);
+    G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
+    G4String particleName;
+    G4ParticleDefinition* particle
+            = particleTable->FindParticle(particleName = "e-");
+    fParticleGun->SetParticleDefinition(particle);
+    fParticleGun->SetParticleEnergy(10. * GeV);
+
+    fDetector = (DetectorConstruction*)
+            G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+    fPrimaryGenMessenger = new PrimaryGeneratorMessenger(this);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
