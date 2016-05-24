@@ -26,12 +26,6 @@ parser.add_option('-S', '--no-submit'   ,    action="store_true",  dest='nosubmi
 
 nSiLayers=2
 
-label='v523'
-#label='v5_30'
-#label='v5_28'
-#label='v5_24'
-#label='v5_18'
-
 #INPATHPU="root://eoscms//eos/cms/store/user/msun/V12/MinBias/"
 INPATHPU="root://eoscms//eos/cms/store/cmst3/group/hgcal/Standalone/V12/MinBias/"
 
@@ -135,8 +129,7 @@ for nPuVtx in nPuVtxlist:
         if opt.Bfield>0 : bval="BON" 
         
         outDir='%s/version_%d/model_%d/%s'%(opt.out,opt.version,opt.model,bval)
-        outDir='%s/%s'%(outDir,label) 
-        
+              
         #eosDirIn='%s'%(opt.eosin)
         if (opt.run>=0) : outDir='%s/run_%d/'%(outDir,opt.run)
     
@@ -155,7 +148,7 @@ for nPuVtx in nPuVtxlist:
         scriptFile.write('#!/bin/bash\n')
         scriptFile.write('source /data/cmszfs1/sw/HGCAL_SIM_A/setup.sh\n')
         #scriptFile.write('cd %s\n'%(outDir))
-        outTag='%s_version%d_model%d_%s'%(label,opt.version,opt.model,bval)
+        outTag='version%d_model%d_%s'%(opt.version,opt.model,bval)
         if (opt.run>=0) : outTag='%s_run%d'%(outTag,opt.run)
         scriptFile.write('localdir=`pwd`\n')
         scriptFile.write('%s/bin/digitizer %d %sHGcal_%s.root $localdir/ %s %s %s %d %d %d %s | tee %s\n'%(os.getcwd(),opt.nevts,eosDirIn,outTag,granularity,noise,threshold,interCalib,nSiLayers,nPuVtx,INPATHPU,outlog))
