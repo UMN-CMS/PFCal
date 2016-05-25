@@ -99,6 +99,7 @@ public:
   };
 
   inline G4Colour g4Colour(const unsigned & aEle){
+    G4cout << "Setting colours\n";
     if (isSensitiveElement(aEle)) return G4Colour::Red();
     if (ele_name[aEle] == "Cu") return G4Colour::Black();
     if (isAbsorberElement(aEle)) return G4Colour::Gray();

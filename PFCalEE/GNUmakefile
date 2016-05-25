@@ -48,6 +48,7 @@ SUBDIRS = userlib
 #$(G4TMPDIR)/pythia6.o:
 #        $(FC) $(FCFLAGS) $(PYTHIA6)/pythia-$(PYTHIA6_VERSION).f -o $(G4TMPDIR)/pythia6.o
 
+print-%  : ; @echo $* = $($*)
 
 $(SUBDIRS):
 	$(MAKE) -C $@

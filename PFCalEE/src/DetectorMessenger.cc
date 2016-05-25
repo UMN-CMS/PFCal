@@ -64,6 +64,12 @@ DetectorMessenger::DetectorMessenger(
   SetModelCmd->SetParameterName("Model",true);
   SetModelCmd->SetDefaultValue(0);
   SetModelCmd->AvailableForStates(G4State_PreInit,G4State_Idle);  
+  
+  SetVersionCmd = new G4UIcmdWithAnInteger("/N03/det/setVersion",this);
+  SetVersionCmd->SetGuidance("Define detector version");
+  SetVersionCmd->SetParameterName("Version",true);
+  SetVersionCmd->SetDefaultValue(0);
+  SetVersionCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 
 }
 
@@ -73,6 +79,7 @@ DetectorMessenger::~DetectorMessenger()
 {
   delete MagFieldCmd;
   delete SetModelCmd;
+  delete SetVersionCmd;
   delete detDir;
   delete N03Dir;  
 }
@@ -85,6 +92,8 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
    { Detector->SetMagField(MagFieldCmd->GetNewDoubleValue(newValue));}
   if (command == SetModelCmd )
     { Detector->SetDetModel(SetModelCmd->GetNewIntValue(newValue));}
+  if (command == SetVersionCmd )
+    { Detector->SetDetVersion(SetVersionCmd->GetNewIntValue(newValue));}
 
 }
 

@@ -11,11 +11,10 @@ random.seed()
 
 usage = 'usage: %prog [options]'
 parser = optparse.OptionParser(usage)
-parser.add_option('-r', '--run'         ,    dest='run'                , help='stat run'                     , default=-1,      type=int)
 parser.add_option('-v', '--version'     ,    dest='version'            , help='detector version'             , default=3,      type=int)
 parser.add_option('-m', '--model'       ,    dest='model'              , help='detector model'               , default=3,      type=int)
 parser.add_option('-b', '--Bfield'      ,    dest='Bfield'             , help='B field value in Tesla'       , default=0,      type=float)
-parser.add_option('-n', '--nevts'       ,    dest='nevts'              , help='number of events to generate' , default=5,    type=int)
+parser.add_option('-n', '--nevts'       ,    dest='nevts'              , help='number of events to generate' , default=15,    type=int)
 parser.add_option('-o', '--out'         ,    dest='out'                , help='output directory'             , default=os.getcwd() )
 parser.add_option('-e', '--eos'         ,    dest='eos'                , help='eos path to save root file to EOS',         default='')
 parser.add_option('-E', '--eosin'       ,    dest='eosin'              , help='eos path to read input root file from EOS',  default='')
@@ -131,7 +130,6 @@ for nPuVtx in nPuVtxlist:
         outDir='%s/version_%d/model_%d/%s'%(opt.out,opt.version,opt.model,bval)
               
         #eosDirIn='%s'%(opt.eosin)
-        if (opt.run>=0) : outDir='%s/run_%d/'%(outDir,opt.run)
     
         if len(opt.eos)>0:
             eosDirIn='root://eoscms//eos/cms%s'%(opt.eosin)
@@ -149,7 +147,6 @@ for nPuVtx in nPuVtxlist:
         scriptFile.write('source /data/cmszfs1/sw/HGCAL_SIM_A/setup.sh\n')
         #scriptFile.write('cd %s\n'%(outDir))
         outTag='version%d_model%d_%s'%(opt.version,opt.model,bval)
-        if (opt.run>=0) : outTag='%s_run%d'%(outTag,opt.run)
         scriptFile.write('localdir=`pwd`\n')
         scriptFile.write('%s/bin/digitizer %d %sHGcal_%s.root $localdir/ %s %s %s %d %d %d %s | tee %s\n'%(os.getcwd(),opt.nevts,eosDirIn,outTag,granularity,noise,threshold,interCalib,nSiLayers,nPuVtx,INPATHPU,outlog))
         scriptFile.write('echo "--Local directory is " $localdir >> %s\n'%(g4log))
@@ -176,8 +173,8 @@ for nPuVtx in nPuVtxlist:
             scriptFile.write('mv DigiPFcal.root Digi%s_%s.root\n'%(suffix,outTag))
 
         scriptFile.write('echo "--deleting core files: too heavy!!"\n')
-        scriptFile.write('rm core.*\n')
-        scriptFile.write('cp * %s/\n'%(outDir))
+        #scriptFile.write('rm core.*\n')
+        #scriptFile.write('cp * %s/\n'%(outDir))
         scriptFile.write('echo "All done"\n')
         scriptFile.close()
         
@@ -186,7 +183,7 @@ for nPuVtx in nPuVtxlist:
         os.system('chmod u+rwx %s/runDigiJob%s.sh'%(outDir,suffix))
         if opt.nosubmit : os.system('echo bsub -q %s %s/runDigiJob%s.sh'%(myqueue,outDir,suffix)) 
         else: os.system("bsub -q %s \'%s/runDigiJob%s.sh\'"%(myqueue,outDir,suffix))
-"""
+        """
 
 
         #submit

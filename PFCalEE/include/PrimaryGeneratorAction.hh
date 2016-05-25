@@ -35,6 +35,7 @@
 #define PrimaryGeneratorAction_h 1
 
 #include "G4VUserPrimaryGeneratorAction.hh"
+#include "G4PrimaryParticle.hh"
 #include "G4ThreeVector.hh"
 #include "globals.hh"
 #include <map>
@@ -64,13 +65,18 @@ public:
   bool goodStream();
 
 private:
-  bool GetNextPrimaryStats(G4ThreeVector& v, G4ThreeVector& r, G4double& energy, G4int& pid);
+  bool GetNextPrimaryStats(/*G4ThreeVector& v, G4ThreeVector& r, G4double& energy, G4int& pid*/);
 
 private:
-  G4ParticleGun*             fParticleGun; // G4 particle gun
-  std::ifstream*             fEventStream;
-  int                        fNEventsRead;
-  G4String                   fInputFile;
+  G4ParticleGun*                  fParticleGun; // G4 particle gun
+  std::ifstream*                  fEventStream;
+  int                             fNEventsRead;
+  G4String                        fInputFile;
+  //std::vector<G4PrimaryParticle*> particleList;
+  std::vector<double>             energies;
+  std::vector<int>                pdgs;
+  std::vector<G4ThreeVector>     positions;
+  std::vector<G4ThreeVector>     momenta;
 
   DetectorConstruction*      fDetector;
   PrimaryGeneratorMessenger* fPrimaryGenMessenger;

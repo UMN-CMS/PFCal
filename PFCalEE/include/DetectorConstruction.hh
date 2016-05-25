@@ -119,6 +119,7 @@ public:
    */
 
   void SetDetModel(G4int model);
+  void SetDetVersion(G4int version);
 
   void SetWThick(std::string thick);
   void SetPbThick(std::string thick);

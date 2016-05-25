@@ -38,6 +38,7 @@ int main(int argc,char** argv)
 
   // Set mandatory initialization classes
   int version=DetectorConstruction::v_HGCAL_2016TB;
+  //int version=33;
 
   //int version=DetectorConstruction::v_HGCALEE_TB;
   //int model=DetectorConstruction::m_FULLSECTION;
@@ -71,9 +72,10 @@ int main(int argc,char** argv)
  // runManager->Initialize();
   
   // Initialize visualization
-#ifdef G4VIS_USE
   G4VisManager* visManager = new G4VisExecutive;
   visManager->Initialize();
+#ifdef G4VIS_USE
+  
 
   /*
   G4TrajectoryDrawByParticleID* model = new G4TrajectoryDrawByParticleID;

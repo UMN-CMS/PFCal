@@ -36,6 +36,8 @@
 
 #include "G4RunManager.hh"
 #include "G4Event.hh"
+#include "G4PrimaryVertex.hh"
+#include "G4PrimaryParticle.hh"
 #include "G4ParticleGun.hh"
 #include "G4ParticleTable.hh"
 #include "G4ParticleDefinition.hh"
@@ -60,12 +62,12 @@ fInputFile("") {
     // default generator is particle gun.
     fParticleGun = new G4ParticleGun(n_particle);
 
-    G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
+    /*G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
     G4String particleName;
     G4ParticleDefinition* particle
             = particleTable->FindParticle(particleName = "e-");
     fParticleGun->SetParticleDefinition(particle);
-    fParticleGun->SetParticleEnergy(10. * GeV);
+    fParticleGun->SetParticleEnergy(10.*GeV);*/
 
     fDetector = (DetectorConstruction*)
             G4RunManager::GetRunManager()->GetUserDetectorConstruction();
@@ -75,7 +77,7 @@ fInputFile("") {
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PrimaryGeneratorAction::~PrimaryGeneratorAction() {
-    delete fParticleGun;
+    //delete fParticleGun;
     delete fPrimaryGenMessenger;
 
     fEventStream->close();
@@ -119,7 +121,7 @@ bool PrimaryGeneratorAction::SetInputFile(std::string filename) {
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-bool PrimaryGeneratorAction::GetNextPrimaryStats(G4ThreeVector& v, G4ThreeVector& r, G4double& energy, G4int& pid) {
+bool PrimaryGeneratorAction::GetNextPrimaryStats(/*G4ThreeVector& v, G4ThreeVector& r, G4double& energy, G4int& pid*/) {
 
     std::string line = "";
 
@@ -127,13 +129,25 @@ bool PrimaryGeneratorAction::GetNextPrimaryStats(G4ThreeVector& v, G4ThreeVector
     while (std::getline(*fEventStream, line) && goodStream() && (line.length() != 8 || line.substr(0, 8) != "</event>")) {
         
         std::istringstream ss(line);
+        int pid;
+        double energy;
         double px = 0, py = 0, pz = 0;
         double x = 0, y = 0, z = 0;
         if (!(ss >> pid >> x >> y >> z >> px >> py >> pz >> energy)) { 
            break;
         }
-        r.set(x, y, z);
+        
+        pdgs.push_back(pid);
+        energies.push_back(energy*GeV);
+        positions.push_back(G4ThreeVector(x*cm,y*cm,z*cm));
+        momenta.push_back(G4ThreeVector(px,py,pz));
+        /*r.set(x, y, z);
         v.set(px*GeV, py*GeV, pz*GeV);
+        G4PrimaryParticle* particle = new G4PrimaryParticle(pid);
+        particle->SetTotalEnergy(energy);
+        particle->SetMomentumDirection(v);
+        
+        particleList.push_back(particle);*/
         gotStats = true;
     }
     
@@ -155,7 +169,7 @@ bool PrimaryGeneratorAction::GetNextPrimaryStats(G4ThreeVector& v, G4ThreeVector
 
     if (!goodStream()) {
         G4ExceptionDescription msg;
-        msg << "Error or EOF in reading primary events from file after" << fNEventsRead
+        msg << "Error or EOF in reading primary events from file after " << fNEventsRead
                 << " good Events" << G4endl;
         G4Exception("PrimaryGeneratorAction::GetNextPrimaryStats()",
                 "MyCode0004", JustWarning, msg);
@@ -192,23 +206,45 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent) {
     }
 
     // Set gun position and momentum
-    G4ThreeVector nextPrimaryPosition;
+    /*G4ThreeVector nextPrimaryPosition;
     G4ThreeVector nextPrimaryMomentumDirection;
-    G4double nextPrimaryEnergy;
-    G4int pid;
-    if (!GetNextPrimaryStats(nextPrimaryMomentumDirection, nextPrimaryPosition, nextPrimaryEnergy, pid)) {
-        G4Exception("G4HEPEvtInterface::GeneratePrimaryVertex","Event0202", JustWarning,"End-Of-File : HEPEvt input file");
+    G4ThreeVector vertexPosition;
+    G4int vertexTime = 0;*/
+
+    /*G4double nextPrimaryEnergy;
+    G4int pid;*/
+    if (!GetNextPrimaryStats(/*nextPrimaryMomentumDirection, nextPrimaryPosition, nextPrimaryEnergy, pid vertexPosition*/)) {
+        G4Exception("G4HEPEvtInterface::GeneratePrimaryVertex", "Event0202", JustWarning, "End-Of-File : HEPEvt input file");
         return;
     }
+    // G4PrimaryVertex* vertex = new G4PrimaryVertex(vertexPosition, vertexTime);
     G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
-    G4ParticleDefinition* particle = particleTable->FindParticle(pid);
-    
+
     //Set gun position, direction and energy
-    fParticleGun->SetParticlePosition(nextPrimaryPosition);
-    fParticleGun->SetParticleMomentumDirection(nextPrimaryMomentumDirection);
-    fParticleGun->SetParticleEnergy(nextPrimaryEnergy);
-    fParticleGun->SetParticleDefinition(particle);
-    fParticleGun->GeneratePrimaryVertex(anEvent);
+
+    for (size_t i = 0; i < pdgs.size(); i++) {
+    
+        fParticleGun->SetParticlePosition(positions[i]);
+        fParticleGun->SetParticleMomentumDirection(momenta[i]);
+        fParticleGun->SetParticleEnergy(energies[i]);
+
+        G4ParticleDefinition* particle = particleTable->FindParticle(pdgs[i]);
+        fParticleGun->SetParticleDefinition(particle);
+        G4cout << "DIRECTION IS: " << "X: " << momenta[i][0] << "Y: " << momenta[i][1] << "Z: " << momenta[i][2] << G4endl;
+        G4cout << "WE ARE IN EVENT: " << fNEventsRead << G4endl;
+        G4cout << "WE ARE HERE AND ENERGIES ARE: " << energies[i] << G4endl;
+        fParticleGun->GeneratePrimaryVertex(anEvent);
+    }
+
+    //    for(size_t j=0; j<particleList.size(); j++) { delete particleList[j]; }
+    pdgs.clear();
+    energies.clear();
+    positions.clear();
+    momenta.clear();
+
+    //anEvent->AddPrimaryVertex(vertex);
+
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
