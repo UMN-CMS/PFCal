@@ -65,21 +65,22 @@ public:
   bool goodStream();
 
 private:
-  bool GetNextPrimaryStats(/*G4ThreeVector& v, G4ThreeVector& r, G4double& energy, G4int& pid*/);
+  bool GetNextPrimaryStats();
 
 private:
-  G4ParticleGun*                  fParticleGun; // G4 particle gun
-  std::ifstream*                  fEventStream;
-  int                             fNEventsRead;
-  G4String                        fInputFile;
-  //std::vector<G4PrimaryParticle*> particleList;
-  std::vector<double>             energies;
-  std::vector<int>                pdgs;
-  std::vector<G4ThreeVector>     positions;
-  std::vector<G4ThreeVector>     momenta;
-
+    
   DetectorConstruction*      fDetector;
   PrimaryGeneratorMessenger* fPrimaryGenMessenger;
+    
+  G4ParticleGun*             fParticleGun;
+  std::ifstream*             fEventStream;
+  int                        fNEventsRead;
+  G4String                   fInputFile;
+  
+  std::vector<double>        energies;
+  std::vector<int>           pdgs;
+  std::vector<G4ThreeVector> positions;
+  std::vector<G4ThreeVector> momenta;
 
   int model_;
   
