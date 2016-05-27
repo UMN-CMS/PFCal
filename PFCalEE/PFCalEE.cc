@@ -37,8 +37,7 @@ int main(int argc,char** argv)
   G4RunManager * runManager = new G4RunManager;
 
   // Set mandatory initialization classes
-  //int version=DetectorConstruction::v_HGCAL_2016TB;
-  int version=30;
+  int version=DetectorConstruction::v_HGCALEE_v6;
 
   //int version=DetectorConstruction::v_HGCALEE_TB;
   //int model=DetectorConstruction::m_FULLSECTION;
@@ -52,14 +51,14 @@ int main(int argc,char** argv)
 
   std::cout << "-- Running version " << version << " model " << model << std::endl;
 
-  std::string absThickW="1.75,1.75,1.75,1.75,1.75,2.8,2.8,2.8,2.8,2.8,4.2,4.2,4.2,4.2,4.2";
+  /*std::string absThickW="1.75,1.75,1.75,1.75,1.75,2.8,2.8,2.8,2.8,2.8,4.2,4.2,4.2,4.2,4.2";
   std::string absThickPb="1,1,1,1,1,2.1,2.1,2.1,2.1,2.1,4.4,4.4,4.4,4.4";
-  std::string dropLayers="";
-  if(argc>5) absThickW = argv[4];
+  std::string dropLayers="";*/
+  /*if(argc>5) absThickW = argv[4];
   if(argc>6) absThickPb = argv[5];
-  if(argc>7) dropLayers = argv[6];
+  if(argc>7) dropLayers = argv[6];*/
 
-  runManager->SetUserInitialization(new DetectorConstruction(version,model,absThickW,absThickPb,dropLayers));
+  runManager->SetUserInitialization(new DetectorConstruction(version,model/*,absThickW,absThickPb,dropLayers*/));
   runManager->SetUserInitialization(new PhysicsList);
 
   // Set user action classes

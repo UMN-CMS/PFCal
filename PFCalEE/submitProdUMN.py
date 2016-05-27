@@ -24,31 +24,6 @@ parser.add_option('-g', '--gun'         ,    action="store_true",  dest='dogun' 
 parser.add_option('-S', '--no-submit'   ,    action="store_true",  dest='nosubmit'           , help='Do not submit batch job.')
 (opt, args) = parser.parse_args()
 
-wthick='1.75,1.75,1.75,1.75,1.75,2.8,2.8,2.8,2.8,2.8,4.2,4.2,4.2,4.2,4.2'
-pbthick='1,1,1,1,1,2.1,2.1,2.1,2.1,2.1,4.4,4.4,4.4,4.4'
-droplayers=''
-#label='v5_30'
-##28
-#wthick='1.75,1.75,1.75,1.75,1.75,2.8,2.8,2.8,2.8,2.8,4.2,4.2,4.2,4.2,4.2'
-#pbthick='1,1,1,1,1,2.1,2.1,2.1,2.1,2.1,4.4,4.4,5.6,5.6'
-#droplayers='25,27'
-#label='v5_28'
-##24
-#wthick='1.75,1.75,1.75,1.75,1.75,2.8,2.8,2.8,2.8,2.8,4.2,4.2,4.2,4.2,4.2'
-#pbthick='2.2,2.2,1,1,2.2,2.1,2.1,3.3,2.1,2.1,4.4,4.4,5.6,5.6'
-#droplayers='1,3,10,15,25,27'
-#label='v5_24'
-##18
-#wthick='1.75,1.75,1.75,1.75,1.75,2.8,2.8,2.8,2.8,2.8,4.2,4.2,4.2,4.2,4.2'
-#pbthick='2.2,2.2,2.2,2.2,2.2,2.2,2.1,3.3,3.3,3.3,4.4,5.6,5.6,5.6'
-#droplayers='1,3,5,7,10,12,15,18,20,23,25,27'
-#label='v5_18'
-
-
-
-nevents=opt.nevts
-#if en>150: nevents=nevents/2
-   
 bval="BOFF"
 if opt.Bfield>0 : bval="BON" 
 
@@ -106,7 +81,7 @@ if opt.dogun:
 else :
     g4Macro.write('/filemode/inputFilename %s\n'%(opt.datafile))
     g4Macro.write('/run/initialize\n')
-    g4Macro.write('/run/beamOn %d\n'%(nevents))
+    g4Macro.write('/run/beamOn %d\n'%(opt.nevts))
 g4Macro.close()
 
 #submit

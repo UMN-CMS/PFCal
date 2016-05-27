@@ -27,7 +27,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 public:
 
   enum DetectorVersion { 
-    v_CALICE=0,
+    /*v_CALICE=0,
     v_HGCALEE_Si80=1,
     v_HGCALEE_Si120=2,
     v_HGCALEE_Si200=3,
@@ -49,9 +49,9 @@ public:
     v_HGCAL_v5=25,
     v_HGCAL_v5_gap4=26,
     v_HGCALHE_v5=27,
-    v_HGCALBE_v5=28,
-    v_HGCALEE_v6=30,
-    v_HGCALHE_v6=31,
+    v_HGCALBE_v5=28,*/
+    v_HGCALEE_v6=30
+    /*v_HGCALHE_v6=31,
     v_HGCALBE_v6=32,
     v_HGCAL_v6=33,
     v_HGCALEE_v624=34,
@@ -64,29 +64,29 @@ public:
     v_HGCALEE_TB_gap0=101,
     v_HGCALEE_TB_allW=102,
     v_HGCALEE_TB_samedEdx=103,
-    v_HGCAL_2016TB=110
+    v_HGCAL_2016TB=110*/
   };
 
   enum DetectorModel {
     m_SIMPLE_20=0,
     m_SIMPLE_50=1,
     m_FULLSECTION=2,
-    m_SIMPLE_100=3,
-    m_BOXWITHCRACK_100=4,
-    m_2016TB=5
+    m_SIMPLE_100=3
+    /*m_BOXWITHCRACK_100=4,
+    m_2016TB=5*/
   };
 
   /**
      @short CTOR
    */
-  DetectorConstruction(G4int ver=DetectorConstruction::v_CALICE, 
-		       G4int mod=DetectorConstruction::m_SIMPLE_20,
+  DetectorConstruction(G4int ver=DetectorConstruction::v_HGCALEE_v6,
+		       G4int mod=DetectorConstruction::m_SIMPLE_20/*,
 		       std::string absThickW="1.75,1.75,1.75,1.75,1.75,2.8,2.8,2.8,2.8,2.8,4.2,4.2,4.2,4.2,4.2",
 		       std::string absThickPb="1,1,1,1,1,2.1,2.1,2.1,2.1,2.1,4.4,4.4,4.4,4.4",
-		       std::string dropLayer="");
+		       std::string dropLayer=""*/);
 
-  void buildHGCALFHE(const unsigned aVersion);
-  void buildHGCALBHE(const unsigned aVersion);
+  /*void buildHGCALFHE(const unsigned aVersion);
+  void buildHGCALBHE(const unsigned aVersion);*/
   /**
      @short calorimeter structure (sampling sections)
    */
@@ -121,9 +121,9 @@ public:
   void SetDetModel(G4int model);
   void SetDetVersion(G4int version);
 
-  void SetWThick(std::string thick);
+  /*void SetWThick(std::string thick);
   void SetPbThick(std::string thick);
-  void SetDropLayers(std::string layers);
+  void SetDropLayers(std::string layers);*/
 
   /**
      @short DTOR
@@ -155,9 +155,9 @@ private:
   //add a pre PCB plate
   bool addPrePCB_;
 
-  std::vector<G4double> absThickW_;
+  /*std::vector<G4double> absThickW_;
   std::vector<G4double> absThickPb_;
-  std::vector<G4bool> dropLayer_;
+  std::vector<G4bool> dropLayer_;*/
 
   /**
      @short compute the calor dimensions
@@ -177,8 +177,8 @@ private:
 			    const G4double & minL, 
 			    const G4double & width);
 
-  G4double getCrackOffset(size_t layer);
-  G4double getAngOffset(size_t layer);
+  /*G4double getCrackOffset(size_t layer);
+  G4double getAngOffset(size_t layer);*/
 
   G4VSolid *constructSolid (std::string baseName, G4double thick, G4double zpos,const G4double & minL, const G4double & width);
   
@@ -187,7 +187,7 @@ private:
   
   G4double           m_CalorSizeXY, m_CalorSizeZ;
   G4double           m_minRadius,m_maxRadius;
-  G4double           m_minEta,m_maxEta;
+  G4double           m_minTheta,m_maxTheta;
   G4double           m_z0pos;
   G4double           m_WorldSizeXY, m_WorldSizeZ;
   G4double m_nSectors,m_sectorWidth,m_interSectorWidth;
