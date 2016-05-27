@@ -6,3 +6,7 @@ LSFJOB_*
 bin
 obj
 *.root
+*.swp
+*.log
+*.swo
+*.history
