@@ -10,6 +10,7 @@
 #include "G4VSolid.hh"
 #include "G4Box.hh"
 #include "G4Tubs.hh"
+#include "G4RunManager.hh"
 #include "G4Polyhedra.hh"
 #include "G4LogicalVolume.hh"
 #include "G4PVPlacement.hh"
@@ -780,6 +781,7 @@ void DetectorConstruction::SetDetModel(G4int model)
   if (model <= 0) return;
   std::cout << " -- Setting detector model to " << model << std::endl;
   model_ = model;
+  G4RunManager::GetRunManager()->GeometryHasBeenModified();
 }
 
 void DetectorConstruction::SetDetVersion(G4int version)
@@ -787,6 +789,7 @@ void DetectorConstruction::SetDetVersion(G4int version)
   if (version <= 0) return;
   std::cout << " -- Setting detector version to " << version << std::endl;
   version_ = version;
+  G4RunManager::GetRunManager()->GeometryHasBeenModified();
 }
 
 void DetectorConstruction::SetWThick(std::string thick)

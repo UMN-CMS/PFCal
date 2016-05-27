@@ -11,8 +11,8 @@ random.seed()
 
 usage = 'usage: %prog [options]'
 parser = optparse.OptionParser(usage)
-parser.add_option('-v', '--version'     ,    dest='version'            , help='detector version'             , default=3,      type=int)
-parser.add_option('-m', '--model'       ,    dest='model'              , help='detector model'               , default=3,      type=int)
+parser.add_option('-v', '--version'     ,    dest='version'            , help='detector version'             , default=30,      type=int)
+parser.add_option('-m', '--model'       ,    dest='model'              , help='detector model'               , default=0,      type=int)
 parser.add_option('-b', '--Bfield'      ,    dest='Bfield'             , help='B field value in Tesla'       , default=0,      type=float)
 parser.add_option('-n', '--nevts'       ,    dest='nevts'              , help='number of events to generate' , default=15,    type=int)
 parser.add_option('-o', '--out'         ,    dest='out'                , help='output directory'             , default=os.getcwd() )

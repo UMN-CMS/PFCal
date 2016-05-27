@@ -3,8 +3,8 @@
 /event/verbose 0
 /tracking/verbose 0
 /N03/det/setField 0.0 T
-/N03/det/setModel 3
-/N03/det/setVersion 5
-/filemode/inputFilename /local/cms/user/hiltbran/standalone_sim/PFCalEE/neutron_events/myFile.lhe
+/N03/det/setModel 0 
+/N03/det/setVersion 30 
+/filemode/inputFilename /data/cmszfs1/user/hiltbran/standalone_sim/PFCalEE/neutron_events/myFile.lhe
 /run/initialize
 /run/beamOn 15
